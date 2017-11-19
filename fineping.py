@@ -7,17 +7,46 @@ import time
 import subprocess
 import _thread
 
+### Global Variables ###
+
+HOSTS_ARR = []
+
+
+### FUNCTIONS ###
+
+def split_second_comma(s):
+    """ Split a list on every 2nd comma """
+
+    arr = s.split(',')
+    arr = [x.strip() for x in arr]
+
+    new_arr = []
+    for x, y in zip(arr[0::2], arr[1::2]):
+        new_arr.append(x + ',' + y)
+
+    return new_arr
 
 def ping(host, desc):
-    """ Ping a host without output in terminal """
+    """ Ping a host without output in terminal and updating it's state """
     fnull = open(os.devnull, 'w')
     fail = subprocess.call(['ping', "-c 1", host], stdout=fnull, stderr=subprocess.STDOUT)
     if not fail:
-        print('ping to ' + host + ' ' + desc + ' is gut', flush=True)
+        for item in HOSTS_ARR:
+            if item[0] == host and item[1] == desc:
+                item[2] = 'Connected'
     else:
-        print('wth', flush=True)
+        for item in HOSTS_ARR:
+            if item[0] == host and item[1] == desc:
+                item[2] = 'Disconnected'
+
+def update():
+    """ Updating state to host """
+    for update_hosts in HOSTS_ARR:
+        _thread.start_new_thread(ping, (str(update_hosts[0]), str(update_hosts[1],)))
 
 
+
+### RUNNING CODE ####
 
 if sys.argv[1] == '-s':
     while True:
@@ -25,18 +54,19 @@ if sys.argv[1] == '-s':
         time.sleep(2)
         subprocess.call('clear')
 
+
 if sys.argv[1] == '-S':
-    ARGVLIST = sys.argv[2].split(",")
-    ARGVTHREAD = []
-    ARGVTHREAD.append([",".join(ARGVLIST[i:i+2]) for i in range(0, len(ARGVLIST), 2)])
-    for item in ARGVTHREAD:
-        print(item)
-    #for x in ARGVTHREAD.split(' '):
-    #    print('t')
-    #while True:
-    #    _thread.start_new_thread(ping, (str(sys.argv[2].split(',')[0]), sys.argv[2].split(',')[1],))
-    #    time.sleep(2)
-    #    subprocess.call('clear')
+    ARGV_ARR = split_second_comma(sys.argv[2])
+    for items in ARGV_ARR:
+        HOSTS_ARR.append([items.split(',')[0], items.split(',')[1], 'init'])
+
+    while True:
+        update()
+        for hosts in HOSTS_ARR:
+            print('Hosten: ' + hosts[1] + ' - ' + hosts[0] + ' | ' + hosts[2])
+            print(hosts)
+        time.sleep(20)
+        subprocess.call('clear')
 
 elif len(sys.argv) == 1 or sys.argv[1] == '-h':
     print('-h | shows this')
