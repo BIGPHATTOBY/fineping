@@ -64,7 +64,6 @@ if sys.argv[1] == '-S':
         update()
         for hosts in HOSTS_ARR:
             print('Hosten: ' + hosts[1] + ' - ' + hosts[0] + ' | ' + hosts[2])
-            print(hosts)
         time.sleep(20)
         subprocess.call('clear')
 
