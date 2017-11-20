@@ -57,11 +57,11 @@ def update():
         for hosts in HOSTS_ARR:
             pre_string = '{0:<' + str(longest_desc) + 's} | {1:' + str(longest_ip) + 's} | {2:15s}'
             print(pre_string.format(hosts[1], hosts[0], hosts[2]))
-        time.sleep(5)
-        subprocess.call('clear')
 
         for update_hosts in HOSTS_ARR:
             _thread.start_new_thread(ping, (str(update_hosts[0]), str(update_hosts[1],)))
+        time.sleep(5)
+        subprocess.call('clear')
 
 
 
