@@ -41,8 +41,14 @@ def ping(host, desc):
 
 def update():
     """ Updating state to host """
-    for update_hosts in HOSTS_ARR:
-        _thread.start_new_thread(ping, (str(update_hosts[0]), str(update_hosts[1],)))
+    while True:
+        for hosts in HOSTS_ARR:
+            print('Hosten: ' + hosts[1] + ' - ' + hosts[0] + ' | ' + hosts[2])
+        time.sleep(5)
+        subprocess.call('clear')
+
+        for update_hosts in HOSTS_ARR:
+            _thread.start_new_thread(ping, (str(update_hosts[0]), str(update_hosts[1],)))
 
 
 
@@ -59,13 +65,15 @@ if sys.argv[1] == '-S':
     ARGV_ARR = split_second_comma(sys.argv[2])
     for items in ARGV_ARR:
         HOSTS_ARR.append([items.split(',')[0], items.split(',')[1], 'init'])
+    update()
 
-    while True:
-        update()
-        for hosts in HOSTS_ARR:
-            print('Hosten: ' + hosts[1] + ' - ' + hosts[0] + ' | ' + hosts[2])
-        time.sleep(20)
-        subprocess.call('clear')
+
+if sys.argv[1] == '-l':
+    f = open(sys.argv[2], 'r')
+    for lines in f:
+        formattedLine = lines.split()[0]
+        HOSTS_ARR.append([formattedLine.split(',')[0], formattedLine.split(',')[1], 'init'])
+    update()
 
 elif len(sys.argv) == 1 or sys.argv[1] == '-h':
     print('-h | shows this')
