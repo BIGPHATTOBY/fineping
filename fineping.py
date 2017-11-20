@@ -95,4 +95,3 @@ elif sys.argv[1] == '-l':
         formattedLine = lines.split()[0]
         HOSTS_ARR.append([formattedLine.split(',')[0], formattedLine.split(',')[1], 'init'])
     update()
-
