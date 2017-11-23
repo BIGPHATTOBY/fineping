@@ -4,6 +4,7 @@
 import os
 import sys
 import time
+import ipaddress
 import subprocess
 import _thread
 
@@ -73,6 +74,7 @@ if len(sys.argv) == 1 or sys.argv[1] == '-h':
     print('-S | mulitple manual host entry, sample syntax: ', end='')
     print('8.8.8.8,Google DNS,8.8.4.4,GoogleDNSBackup')
     print('-l | entry from list (file), same syntax as -s with newline as divider')
+    print('-n | ping an address scope, example: 192.168.1.1/24 will ping all 255 addresses in that /24 network')
     print('Example: python3 fineping.py -S 8.8.8.8,Google,8.8.4.4,GoogleBackup')
 
 elif sys.argv[1] == '-s':
@@ -94,4 +96,15 @@ elif sys.argv[1] == '-l':
     for lines in f:
         formattedLine = lines.split()[0]
         HOSTS_ARR.append([formattedLine.split(',')[0], formattedLine.split(',')[1], 'init'])
+    update()
+    
+elif sys.argv[1] == '-n':
+    # if sys.argv[2].split('.')[2] != :
+    #     print('The last octet is a host bit, please use network bit.')
+    #     sys.exit()
+    IPADDR = ipaddress.ip_network(str(sys.argv[2]), strict=False)
+    i = 0
+    for ips in IPADDR:
+        HOSTS_ARR.append([str(ips), str(i), 'init'])
+        i = i + 1
     update()
