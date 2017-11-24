@@ -6,12 +6,19 @@ import sys
 import time
 import ipaddress
 import subprocess
-import _thread
+import threading
 
 ### Global Variables ###
 
 HOSTS_ARR = []
 
+class myThread (threading.Thread):
+    def __init__(self, threadID, host_address):
+        threading.Thread.__init__(self)
+        self.threadID = threadID
+        self.host_address = host_address
+    def run(self):
+        ping(self.host_address)
 
 ### FUNCTIONS ###
 
@@ -27,20 +34,22 @@ def split_second_comma(s):
 
     return new_arr
 
-def ping(host, desc):
+def ping(host):
     """ Ping a host without output in terminal and updating it's state """
     fnull = open(os.devnull, 'w')
     fail = subprocess.call(['ping', "-c 1", host], stdout=fnull, stderr=subprocess.STDOUT)
     if not fail:
         for item in HOSTS_ARR:
-            if item[0] == host and item[1] == desc:
+            if item[0] == host:
                 item[2] = 'Connected'
     else:
         for item in HOSTS_ARR:
-            if item[0] == host and item[1] == desc:
+            if item[0] == host:
                 item[2] = 'Disconnected'
 
 def update():
+    arr_check = []
+    threads_arr = []
     """ Updating state to host """
     longest_ip = 0
     longest_desc = 0
@@ -49,20 +58,36 @@ def update():
             longest_ip = len(hosts[0])
         if len(hosts[1]) > longest_desc:
             longest_desc = len(hosts[1])
+    i = 0
+    for hosts in HOSTS_ARR:
+        threads_arr.append(['thread' + str(i), hosts[0]])
+        i = i + 1 
 
     while True:
-        pre_string = '{0:<' + str(longest_desc) + 's} | {1:' + str(longest_ip) + 's} | {2:15s}'
-        print(pre_string.format('DESC.', 'IP', 'STATE'))
-        pre_string = '{0:-^' + str(longest_desc + longest_ip + 18) + 's}'
-        print(pre_string.format(''))
-        for hosts in HOSTS_ARR:
+        if arr_check != HOSTS_ARR:
+            subprocess.call('clear')
             pre_string = '{0:<' + str(longest_desc) + 's} | {1:' + str(longest_ip) + 's} | {2:15s}'
-            print(pre_string.format(hosts[1], hosts[0], hosts[2]))
+            print(pre_string.format('DESC.', 'IP', 'STATE'))
+            pre_string = '{0:-^' + str(longest_desc + longest_ip + 18) + 's}'
+            print(pre_string.format(''))
+            for hosts in HOSTS_ARR:
+                pre_string = '{0:<' + str(longest_desc) + 's} | {1:' + str(longest_ip) + 's} | {2:15s}'
+                print(pre_string.format(hosts[1], hosts[0], hosts[2]))
+            arr_check = [HOSTS_ARR[i][0:3] for i in range(0,len(HOSTS_ARR))]
 
-        for update_hosts in HOSTS_ARR:
-            _thread.start_new_thread(ping, (str(update_hosts[0]), str(update_hosts[1],)))
+        i = 0
+        
+
+        for threads in threads_arr:
+            threads[0] = myThread(i, threads[1])
+            i = i + 1
+        for threads in threads_arr:
+            threads[0].start()
+        for threads in threads_arr:           
+            threads[0].join()      
+        while threading.active_count() > 1:
+            time.sleep(.1)
         time.sleep(5)
-        subprocess.call('clear')
 
 
 
@@ -99,9 +124,6 @@ elif sys.argv[1] == '-l':
     update()
     
 elif sys.argv[1] == '-n':
-    # if sys.argv[2].split('.')[2] != :
-    #     print('The last octet is a host bit, please use network bit.')
-    #     sys.exit()
     IPADDR = ipaddress.ip_network(str(sys.argv[2]), strict=False)
     i = 0
     for ips in IPADDR:
