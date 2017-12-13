@@ -50,9 +50,10 @@ def ping(host):
 def update():
     arr_check = []
     threads_arr = []
+    #timed_runned = 0
     """ Updating state to host """
     longest_ip = 0
-    longest_desc = 0
+    longest_desc = 6
     for hosts in HOSTS_ARR:
         if len(hosts[0]) > longest_ip:
             longest_ip = len(hosts[0])
@@ -65,13 +66,15 @@ def update():
 
     while True:
         if arr_check != HOSTS_ARR:
+            #timed_runned = timed_runned + 1
             subprocess.call('clear')
-            pre_string = '{0:<' + str(longest_desc) + 's} | {1:' + str(longest_ip) + 's} | {2:15s}'
+            #print(timed_runned)
+            pre_string = '{0:' + str(longest_desc) + 's} | {1:' + str(longest_ip) + 's} | {2:15s}'
             print(pre_string.format('DESC.', 'IP', 'STATE'))
             pre_string = '{0:-^' + str(longest_desc + longest_ip + 18) + 's}'
             print(pre_string.format(''))
             for hosts in HOSTS_ARR:
-                pre_string = '{0:<' + str(longest_desc) + 's} | {1:' + str(longest_ip) + 's} | {2:15s}'
+                pre_string = '{0:' + str(longest_desc) + 's} | {1:' + str(longest_ip) + 's} | {2:15s}'
                 print(pre_string.format(hosts[1], hosts[0], hosts[2]))
             arr_check = [HOSTS_ARR[i][0:3] for i in range(0,len(HOSTS_ARR))]
 
