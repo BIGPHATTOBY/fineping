@@ -133,3 +133,4 @@ elif sys.argv[1] == '-n':
         HOSTS_ARR.append([str(ips), str(i), 'init'])
         i = i + 1
     update()
+
